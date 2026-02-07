@@ -4,22 +4,27 @@
 
 package frc.robot.subsystems;
 
-import java.io.File;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.SwerveConstants;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
@@ -29,30 +34,37 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase {
 
   private final SwerveDrive m_swerve;
+  private final CommandXboxController m_driverController;
+
+  private final PIDController m_hubAimController = new PIDController(0.3, 0, 0);
 
   /** Creates a new SwerveSubsystem. */
-  public SwerveSubsystem() {
+  public SwerveSubsystem(CommandXboxController driverController) {
+
+    m_driverController = driverController;
 
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
     try {
-      m_swerve = new SwerveParser(new File(Filesystem.getDeployDirectory(), "swerve"))
-          .createSwerveDrive(Units.feetToMeters(16));
+      m_swerve = new SwerveParser(SwerveConstants.kSwerveConfigurationDirectory)
+          .createSwerveDrive(SwerveConstants.kMaxSpeed);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
     // Swerve configuration
-    m_swerve.setAngularVelocityCompensation(false, false, 0);
+    m_swerve.setAngularVelocityCompensation(true, true, 0.1);
     m_swerve.setAutoCenteringModules(false);
-    m_swerve.setChassisDiscretization(true, 0.02); // Change this to true
-    m_swerve.setCosineCompensator(!SwerveDriveTelemetry.isSimulation); // !SwerveDriveTelemetry.isSimulation
+    // m_swerve.setChassisDiscretization(true, 0.02); // Change this to true
+    m_swerve.setCosineCompensator(!SwerveDriveTelemetry.isSimulation);
     m_swerve.setHeadingCorrection(true);
     m_swerve.setModuleEncoderAutoSynchronize(true, 1);
-    m_swerve.setModuleStateOptimization(true);
+    // m_swerve.setModuleStateOptimization(true);
     m_swerve.setMotorIdleMode(false);
 
     setupPathPlanner();
+
+    m_hubAimController.enableContinuousInput(0, 359);
   }
 
   @Override
@@ -87,28 +99,61 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  private boolean isRedAlliance() {
-    var alliance = DriverStation.getAlliance();
-    if (alliance.isPresent()) {
-      return alliance.get() == DriverStation.Alliance.Red;
-    }
-    return false;
+  public Command driveToPose(Pose2d pose) {
+    PathConstraints constraints = new PathConstraints(
+        m_swerve.getMaximumChassisVelocity(), 1.0,
+        m_swerve.getMaximumChassisAngularVelocity(), Units.degreesToRadians(720));
+
+    return AutoBuilder.pathfindToPose(
+        pose,
+        constraints,
+        MetersPerSecond.of(0));
   }
 
   public Command driveRobotOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
-      m_swerve.drive(velocity.get());
+      if (m_driverController.rightBumper().getAsBoolean()) {
+        var robotTranslation = m_swerve.getPose().getTranslation();
+        var targetTranslation = new Translation2d(4.612, 4.030);
+
+        var angle = targetTranslation.minus(robotTranslation).getAngle();
+
+        m_swerve.drive(new ChassisSpeeds(
+            velocity.get().vxMetersPerSecond,
+            velocity.get().vyMetersPerSecond,
+            m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(), angle.getDegrees())));
+      } else {
+        m_swerve.drive(velocity.get());
+      }
     });
   }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> {
-      m_swerve.driveFieldOriented(velocity.get());
+      if (m_driverController.rightBumper().getAsBoolean()) {
+        var robotTranslation = m_swerve.getPose().getTranslation();
+        var targetTranslation = new Translation2d(4.612, 4.030);
+
+        var angle = targetTranslation.minus(robotTranslation).getAngle();
+
+        m_swerve.driveFieldOriented(new ChassisSpeeds(
+            velocity.get().vxMetersPerSecond,
+            velocity.get().vyMetersPerSecond,
+            m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(), angle.getDegrees())));
+      } else {
+        m_swerve.driveFieldOriented(velocity.get());
+      }
+
     });
   }
 
   public SwerveDrive getSwerveDrive() {
     return m_swerve;
+  }
+
+  private boolean isRedAlliance() {
+    var alliance = DriverStation.getAlliance();
+    return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 
   public void zeroGyro() {
