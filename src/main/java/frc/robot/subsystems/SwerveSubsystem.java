@@ -58,7 +58,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // m_swerve.setChassisDiscretization(true, 0.02); // Change this to true
     m_swerve.setCosineCompensator(!SwerveDriveTelemetry.isSimulation);
     m_swerve.setHeadingCorrection(true);
-    m_swerve.setModuleEncoderAutoSynchronize(true, 1);
+    // m_swerve.setModuleEncoderAutoSynchronize(true, 1);
     // m_swerve.setModuleStateOptimization(true);
     m_swerve.setMotorIdleMode(false);
 
