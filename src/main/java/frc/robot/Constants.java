@@ -15,17 +15,28 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
+        public static final String kSlash = "Intake/";
         public static final int kIntakeMotorId = 13;
+        public static final int kIntakePivotMotorId = 14;
+        public static final int kIntakeCalibrationLimitSwitchId = 0;
     }
 
     public static final class ShooterConstants {
-        public static final int kIndexerMotorId = 15;
-        public static final int kShooterMotorId = 16;
+        public static final String kSlash = "Shooter/";
+        public static final int kLowerIndexerMotorId = 15;
+        public static final int kUpperIndexerMotorId = 16;
+        public static final int kShooterMotorId = 17;
+    }
+
+    public static final class ClimberConstants {
+        public static final String kSlash = "Climber/";
+        public static final int kClimberMotorId = 18;
+        public static final int kClimberCalibrationLimitSwitchId = 1;
     }
 
     public static final class OIConstants {
         public static final int kDriverControllerPort = 0;
-        public static final double kDriverControllerTranslationDeadband = 0.1;
+        public static final double kDriverControllerDeadband = 0.1;
         public static final int kOperatorControllerPort = 1;
     }
 }

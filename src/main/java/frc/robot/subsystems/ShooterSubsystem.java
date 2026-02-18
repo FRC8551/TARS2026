@@ -16,8 +16,9 @@ import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
 
+  private final VictorSPX m_lowerIndexerMotor = new VictorSPX(ShooterConstants.kLowerIndexerMotorId);
+  private final VictorSPX m_upperIndexerMotor = new VictorSPX(ShooterConstants.kUpperIndexerMotorId);
   private final SparkFlex m_shooterMotor = new SparkFlex(ShooterConstants.kShooterMotorId, MotorType.kBrushless);
-  private final VictorSPX m_indexerMotor = new VictorSPX(ShooterConstants.kIndexerMotorId);
 
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
@@ -26,20 +27,23 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Shooter RPM", m_shooterMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(ShooterConstants.kSlash + "Shooter RPM", m_shooterMotor.getEncoder().getVelocity());
   }
 
   public void runShooter() {
     m_shooterMotor.getClosedLoopController().setSetpoint(2900, ControlType.kVelocity);
     if (m_shooterMotor.getEncoder().getVelocity() >= 2900) {
-      m_indexerMotor.set(VictorSPXControlMode.PercentOutput, -0.6);
+      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.6);
+      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.6);
     } else {
-      m_indexerMotor.set(VictorSPXControlMode.PercentOutput, -0.3);
+      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.3);
+      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.3);
     }
   }
 
   public void stopShooter() {
     m_shooterMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
-    m_indexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
+    m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
+    m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
   }
 }

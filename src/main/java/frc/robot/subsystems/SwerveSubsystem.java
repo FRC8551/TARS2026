@@ -36,7 +36,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SwerveDrive m_swerve;
   private final CommandXboxController m_driverController;
 
-  private final PIDController m_hubAimController = new PIDController(0.3, 0, 0);
+  private final PIDController m_hubAimController = new PIDController(0.05, 0, 0);
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem(CommandXboxController driverController) {
@@ -64,6 +64,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     setupPathPlanner();
 
+    new VisionSubsystem(m_swerve::getYaw, m_swerve.getGyro().getYawAngularVelocity()::magnitude,
+        m_swerve::addVisionMeasurement, m_swerve::setVisionMeasurementStdDevs);
+
     m_hubAimController.enableContinuousInput(0, 359);
   }
 
@@ -72,6 +75,41 @@ public class SwerveSubsystem extends SubsystemBase {
     ChassisSpeeds robotVelocity = m_swerve.getRobotVelocity();
     double velocity = Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) * 2.23694;
     SmartDashboard.putNumber(SwerveConstants.kSlash + "Speedometer (MPH)", Math.round(velocity * 1000.0) / 1000.0);
+
+    // Limelight 3G MT1
+    // LimelightHelpers.PoseEstimate ll3Gmt1 =
+    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-better");
+    // SmartDashboard.putString("ll3Gmt1 Pose", ll3Gmt1.pose.toString());
+    // if (ll3Gmt1 != null && ll3Gmt1.tagCount > 0) {
+    // m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 0.5));
+    // m_swerve.addVisionMeasurement(new Pose2d(6.5, 4.5,
+    // Rotation2d.fromDegrees(90)), ll3Gmt1.timestampSeconds);
+    // }
+
+    // Limelight 3G MT2
+    // LimelightHelpers.SetRobotOrientation("limelight-better",
+    // m_swerve.swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+    // 0, 0, 0, 0, 0);
+    // LimelightHelpers.PoseEstimate ll3Gmt2 =
+    // LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-better");
+    // SmartDashboard.putString("ll3Gmt2 Pose", ll3Gmt2.pose.toString());
+    // if (ll3Gmt2 != null && ll3Gmt2.tagCount > 0) {
+    // m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 0.5));
+    // m_swerve.addVisionMeasurement(ll3Gmt2.pose, ll3Gmt2.timestampSeconds);
+    // }
+
+    // LimelightHelpers.SetRobotOrientation("limelight-better",
+    // m_swerve.swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+    // 0, 0, 0, 0, 0);
+    // LimelightHelpers.PoseEstimate ll3Gmt2 =
+    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-better");
+    // if (ll3Gmt2 != null &&
+    // Math.abs(m_swerve.getGyro().getYawAngularVelocity().magnitude()) <= 720 &&
+    // ll3Gmt2.tagCount != 0) {
+    // System.out.println(ll3Gmt2.tagCount);
+    // m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 0.5));
+    // m_swerve.addVisionMeasurement(ll3Gmt2.pose, ll3Gmt2.timestampSeconds);
+    // }
   }
 
   public void setupPathPlanner() {
@@ -114,7 +152,7 @@ public class SwerveSubsystem extends SubsystemBase {
     return run(() -> {
       if (m_driverController.rightBumper().getAsBoolean()) {
         var robotTranslation = m_swerve.getPose().getTranslation();
-        var targetTranslation = new Translation2d(4.612, 4.030);
+        var targetTranslation = isRedAlliance() ? new Translation2d(4.623, 4.030) : new Translation2d(11.917, 4.030);
 
         var angle = targetTranslation.minus(robotTranslation).getAngle();
 
@@ -132,7 +170,7 @@ public class SwerveSubsystem extends SubsystemBase {
     return run(() -> {
       if (m_driverController.rightBumper().getAsBoolean()) {
         var robotTranslation = m_swerve.getPose().getTranslation();
-        var targetTranslation = new Translation2d(4.612, 4.030);
+        var targetTranslation = isRedAlliance() ? new Translation2d(4.623, 4.030) : new Translation2d(11.917, 4.030);
 
         var angle = targetTranslation.minus(robotTranslation).getAngle();
 

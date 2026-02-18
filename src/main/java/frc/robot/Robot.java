@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,11 +25,16 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  private final PowerDistribution m_powerDist = new PowerDistribution(0, ModuleType.kCTRE);
+
   private final SendableChooser<DriveMode> m_driveModeChooser = new SendableChooser<>();
   private DriveMode m_lastDriveMode;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+
+    DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog());
 
     m_driveModeChooser.setDefaultOption("Field-Oriented Direct Angle", DriveMode.FieldOrientedDirectAngle);
     m_driveModeChooser.addOption("Field-Oriented Angular Velocity", DriveMode.FieldOrientedAngularVelocity);

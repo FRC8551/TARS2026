@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.OIConstants;
 import frc.robot.Robot.DriveMode;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -38,7 +39,7 @@ public class RobotContainer {
       () -> -m_driverController.getLeftY(),
       () -> -m_driverController.getLeftX())
       .withControllerRotationAxis(() -> -m_driverController.getRightX())
-      .deadband(0.1)
+      .deadband(OIConstants.kDriverControllerDeadband)
       .scaleTranslation(0.8)
       .allianceRelativeControl(false);
 
@@ -80,14 +81,6 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
-
-    m_driverController.axisGreaterThan(2, 0.5)
-        .onTrue(new InstantCommand(() -> m_intakeSubsystem.runIntake()))
-        .onFalse(new InstantCommand(() -> m_intakeSubsystem.stopIntake()));
-
-    m_driverController.axisGreaterThan(3, 0.5)
-        .whileTrue(new InstantCommand(() -> m_shooterSubsystem.runShooter()).repeatedly())
-        .onFalse(new InstantCommand(() -> m_shooterSubsystem.stopShooter()));
   }
 
   public void changeDriveMode(DriveMode driveMode) {
@@ -97,13 +90,13 @@ public class RobotContainer {
 
     switch (driveMode) {
       case RobotOriented:
-        // m_swerveSubsystem.setDefaultCommand(m_driveRobotOrientedAngularVelocity);
+        m_swerveSubsystem.setDefaultCommand(m_driveRobotOrientedAngularVelocity);
         break;
       case FieldOrientedAngularVelocity:
-        // m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedAngularVelocity);
+        m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedAngularVelocity);
         break;
       case FieldOrientedDirectAngle:
-        // m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedDirectAngle);
+        m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedDirectAngle);
       default:
         break;
     }
