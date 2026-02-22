@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -14,6 +15,7 @@ import frc.robot.Constants.IntakeConstants;
 public class IntakeSubsystem extends SubsystemBase {
 
   private final SparkFlex m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
+  private final SparkMax m_intakePivotMotor = new SparkMax(IntakeConstants.kIntakePivotMotorId, MotorType.kBrushless);
 
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
@@ -25,10 +27,14 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void runIntake() {
-    m_intakeMotor.getClosedLoopController().setSetpoint(1000, ControlType.kVelocity);
+    m_intakeMotor.getClosedLoopController().setSetpoint(1500, ControlType.kVelocity);
   }
 
   public void stopIntake() {
     m_intakeMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
+  }
+
+  public void setIntakePivotSpeed(double speed) {
+    m_intakePivotMotor.set(speed);
   }
 }

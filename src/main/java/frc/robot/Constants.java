@@ -25,12 +25,13 @@ public final class Constants {
         public static final String kSlash = "Shooter/";
         public static final int kLowerIndexerMotorId = 15;
         public static final int kUpperIndexerMotorId = 16;
-        public static final int kShooterMotorId = 17;
+        public static final int kShooterLeftMotorId = 17;
+        public static final int kShooterRightMotorId = 18;
     }
 
     public static final class ClimberConstants {
         public static final String kSlash = "Climber/";
-        public static final int kClimberMotorId = 18;
+        public static final int kClimberMotorId = 19;
         public static final int kClimberCalibrationLimitSwitchId = 1;
     }
 

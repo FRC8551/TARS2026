@@ -6,9 +6,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.FeedForwardConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,31 +23,57 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final VictorSPX m_lowerIndexerMotor = new VictorSPX(ShooterConstants.kLowerIndexerMotorId);
   private final VictorSPX m_upperIndexerMotor = new VictorSPX(ShooterConstants.kUpperIndexerMotorId);
-  private final SparkFlex m_shooterMotor = new SparkFlex(ShooterConstants.kShooterMotorId, MotorType.kBrushless);
+  private final SparkFlex m_shooterLeftMotor = new SparkFlex(ShooterConstants.kShooterLeftMotorId,
+      MotorType.kBrushless);
+  private final SparkFlex m_shooterRightMotor = new SparkFlex(ShooterConstants.kShooterRightMotorId,
+      MotorType.kBrushless);
 
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
+
+    FeedForwardConfig ffConfig = new FeedForwardConfig();
+    ffConfig.kV(0.00015);
+
+    SparkFlexConfig leftConfig = new SparkFlexConfig();
+
+    leftConfig.inverted(true);
+    leftConfig.idleMode(IdleMode.kCoast);
+    leftConfig.closedLoop.pid(0, 0, 0);
+    leftConfig.closedLoop.feedForward.apply(ffConfig);
+
+    SparkFlexConfig rightConfig = new SparkFlexConfig();
+
+    rightConfig.inverted(false);
+    rightConfig.idleMode(IdleMode.kCoast);
+    rightConfig.closedLoop.pid(0, 0, 0);
+    rightConfig.closedLoop.feedForward.apply(ffConfig);
+
+    m_shooterLeftMotor.configure(leftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    m_shooterRightMotor.configure(rightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber(ShooterConstants.kSlash + "Shooter RPM", m_shooterMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(ShooterConstants.kSlash + "Shooter RPM", m_shooterRightMotor.getEncoder().getVelocity());
   }
 
   public void runShooter() {
-    m_shooterMotor.getClosedLoopController().setSetpoint(2900, ControlType.kVelocity);
-    if (m_shooterMotor.getEncoder().getVelocity() >= 2900) {
-      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.6);
-      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.6);
+    m_shooterLeftMotor.getClosedLoopController().setSetpoint(3700, ControlType.kVelocity);
+    m_shooterRightMotor.getClosedLoopController().setSetpoint(3700,
+        ControlType.kVelocity);
+    if (m_shooterRightMotor.getEncoder().getVelocity() >= 3500) {
+      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.65);
+      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.75);
     } else {
-      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.3);
-      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, -0.3);
+      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.31);
+      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.75);
     }
   }
 
   public void stopShooter() {
-    m_shooterMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
+    m_shooterLeftMotor.set(0);
+    m_shooterRightMotor.set(0);
     m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
     m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
   }

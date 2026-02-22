@@ -25,6 +25,7 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
+  @SuppressWarnings("unused")
   private final PowerDistribution m_powerDist = new PowerDistribution(0, ModuleType.kCTRE);
 
   private final SendableChooser<DriveMode> m_driveModeChooser = new SendableChooser<>();

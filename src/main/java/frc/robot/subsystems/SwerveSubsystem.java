@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -17,7 +19,13 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -62,6 +70,10 @@ public class SwerveSubsystem extends SubsystemBase {
     // m_swerve.setModuleStateOptimization(true);
     m_swerve.setMotorIdleMode(false);
 
+    if (SwerveDriveTelemetry.isSimulation) {
+      m_swerve.resetOdometry(new Pose2d(2.5, 4.030, Rotation2d.fromDegrees(0)));
+    }
+
     setupPathPlanner();
 
     new VisionSubsystem(m_swerve::getYaw, m_swerve.getGyro().getYawAngularVelocity()::magnitude,
@@ -75,6 +87,31 @@ public class SwerveSubsystem extends SubsystemBase {
     ChassisSpeeds robotVelocity = m_swerve.getRobotVelocity();
     double velocity = Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) * 2.23694;
     SmartDashboard.putNumber(SwerveConstants.kSlash + "Speedometer (MPH)", Math.round(velocity * 1000.0) / 1000.0);
+
+    double[] fuel = SmartDashboard.getEntry("Fuel").getDoubleArray(new double[0]);
+    Pose2d robotPose = m_swerve.getPose();
+
+    int count = fuel.length / 3;
+    double[] arr = new double[count * 3];
+
+    for (int i = 0; i < count; i++) {
+
+      double xRobot = fuel[i * 3 + 1];
+      double yRobot = fuel[i * 3 + 2];
+
+      Transform2d robotToFuel = new Transform2d(
+          new Translation2d(xRobot, yRobot),
+          new Rotation2d());
+
+      Pose2d fuelFieldPose = robotPose.transformBy(robotToFuel);
+
+      int base = i * 3;
+      arr[base] = fuelFieldPose.getX();
+      arr[base + 1] = fuelFieldPose.getY();
+      arr[base + 2] = 0.0; // On the floor
+    }
+
+    SmartDashboard.getEntry("Field/Fuel").setDoubleArray(arr);
 
     // Limelight 3G MT1
     // LimelightHelpers.PoseEstimate ll3Gmt1 =

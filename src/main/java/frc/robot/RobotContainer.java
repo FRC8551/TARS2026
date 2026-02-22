@@ -26,7 +26,9 @@ import swervelib.SwerveInputStream;
 
 public class RobotContainer {
   // Controllers
-  private final CommandXboxController m_driverController = new CommandXboxController(0);
+  private final CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
+  private final CommandXboxController m_operatorController = new CommandXboxController(
+      OIConstants.kOperatorControllerPort);
 
   // Subsystems
   private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem(m_driverController);
@@ -63,7 +65,9 @@ public class RobotContainer {
   private final SendableChooser<Command> m_autoChooser;
 
   public RobotContainer() {
-    Elastic.sendNotification(new Notification(NotificationLevel.INFO, "Yayyyy", "Robot program started."));
+    // Interstellar reference
+    Elastic.sendNotification(new Notification(NotificationLevel.INFO, "Before you get all teary...",
+        "Try to remember that as a robot, I have to do anything you say. Good luck, Cooper."));
 
     registerNamedCommands();
     configureBindings();
@@ -81,6 +85,20 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
+
+    m_driverController.axisGreaterThan(2, 0.5)
+        .onTrue(new InstantCommand(() -> m_intakeSubsystem.runIntake()))
+        .onFalse(new InstantCommand(() -> m_intakeSubsystem.stopIntake()));
+
+    m_driverController.axisGreaterThan(3, 0.5)
+        .whileTrue(new InstantCommand(() -> m_shooterSubsystem.runShooter()).repeatedly())
+        .onFalse(new InstantCommand(() -> m_shooterSubsystem.stopShooter()));
+
+    m_operatorController.povUp().onTrue(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0.2)))
+        .onFalse(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0)));
+
+    m_operatorController.povDown().onTrue(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(-0.2)))
+        .onFalse(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0)));
   }
 
   public void changeDriveMode(DriveMode driveMode) {
