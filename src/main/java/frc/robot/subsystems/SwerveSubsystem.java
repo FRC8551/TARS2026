@@ -15,6 +15,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,10 +28,11 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Robot;
+import frc.robot.UserConfig;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Robot.DriveMode;
+import frc.robot.UserConfig.DriveMode;
+import frc.robot.util.LimelightHelpers;
+import frc.robot.util.LimelightHelpers.PoseEstimate;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -38,14 +41,11 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase {
 
   private final SwerveDrive m_swerve;
-  private final CommandXboxController m_driverController;
 
-  private final PIDController m_hubAimController = new PIDController(0.05, 0, 0);
+  private final PIDController m_hubAimController = new PIDController(0.08, 0, 0);
 
   /** Creates a new SwerveSubsystem. */
-  public SwerveSubsystem(CommandXboxController driverController) {
-
-    m_driverController = driverController;
+  public SwerveSubsystem() {
 
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
 
@@ -71,9 +71,6 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     setupPathPlanner();
-
-    new VisionSubsystem(m_swerve::getYaw, m_swerve.getGyro().getYawAngularVelocity()::magnitude,
-        m_swerve::addVisionMeasurement, m_swerve::setVisionMeasurementStdDevs);
 
     m_hubAimController.enableContinuousInput(0, 359);
   }
@@ -108,6 +105,31 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     SmartDashboard.getEntry("Field/Fuel").setDoubleArray(arr);
+
+    // Limelight localization
+    final String[] limelights = { "limelight" };
+
+    for (String ll : limelights) {
+      // MegaTag1
+      PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(ll);
+
+      if ((mt1.tagCount == 1 && mt1.rawFiducials.length == 1 && mt1.rawFiducials[0].ambiguity <= 0.7
+          && mt1.rawFiducials[0].distToCamera <= 3) ||
+          (mt1.tagCount >= 2)) {
+        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE));
+        m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
+      }
+
+      // MegaTag2
+      LimelightHelpers.SetRobotOrientation(ll,
+          m_swerve.swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+      PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(ll);
+
+      if (Math.abs(m_swerve.getGyro().getYawAngularVelocity().magnitude()) <= 360 && mt2.tagCount > 0) {
+        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, Double.MAX_VALUE));
+        m_swerve.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+      }
+    }
   }
 
   public void setupPathPlanner() {
@@ -148,45 +170,105 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Command drive(Supplier<ChassisSpeeds> velocity, Supplier<Boolean> hubAimActive) {
     return run(() -> {
-      DriveMode driveMode = Robot.getDriveMode();
-    });
-  }
+      DriveMode driveMode = UserConfig.getDriveMode();
 
-  public Command driveRobotOriented(Supplier<ChassisSpeeds> velocity) {
-    return run(() -> {
-      if (m_driverController.rightBumper().getAsBoolean()) {
-        var robotTranslation = m_swerve.getPose().getTranslation();
-        var targetTranslation = isRedAlliance() ? new Translation2d(4.623, 4.030) : new Translation2d(11.917, 4.030);
+      ChassisSpeeds speeds = velocity.get();
 
-        var angle = targetTranslation.minus(robotTranslation).getAngle();
+      if (UserConfig.getHubAimEnabled() && hubAimActive.get()) {
+        speeds = applyHubAim(speeds);
+      }
 
-        m_swerve.drive(new ChassisSpeeds(
-            velocity.get().vxMetersPerSecond,
-            velocity.get().vyMetersPerSecond,
-            m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(), angle.getDegrees())));
+      if (UserConfig.getBumpAimEnabled()) {
+        speeds = applyBumpAim(speeds);
+      }
+
+      if (driveMode == DriveMode.RobotOriented) {
+        m_swerve.drive(speeds);
       } else {
-        m_swerve.drive(velocity.get());
+        m_swerve.driveFieldOriented(speeds);
       }
     });
   }
 
-  public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-    return run(() -> {
-      if (m_driverController.rightBumper().getAsBoolean()) {
-        var robotTranslation = m_swerve.getPose().getTranslation();
-        var targetTranslation = isRedAlliance() ? new Translation2d(4.623, 4.030) : new Translation2d(11.917, 4.030);
+  private ChassisSpeeds applyHubAim(ChassisSpeeds speeds) {
+    Translation2d robotTranslation = m_swerve.getPose().getTranslation();
+    Translation2d targetTranslation = isRedAlliance() ? new Translation2d(11.917, 4.030)
+        : new Translation2d(4.623, 4.030);
 
-        var angle = targetTranslation.minus(robotTranslation).getAngle();
+    Rotation2d angle = targetTranslation.minus(robotTranslation).getAngle();
 
-        m_swerve.driveFieldOriented(new ChassisSpeeds(
-            velocity.get().vxMetersPerSecond,
-            velocity.get().vyMetersPerSecond,
-            m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(), angle.getDegrees())));
-      } else {
-        m_swerve.driveFieldOriented(velocity.get());
+    if (robotTranslation.getX() < 4 || robotTranslation.getX() > 12.5) {
+      return new ChassisSpeeds(
+          speeds.vxMetersPerSecond,
+          speeds.vyMetersPerSecond,
+          m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(),
+              angle.getDegrees()));
+    } else {
+      return speeds;
+    }
+  }
+
+  private ChassisSpeeds applyBumpAim(ChassisSpeeds speeds) {
+
+    // Each bump zone: {minX, minY, maxX, maxY}
+    double[][] bumpZones = {
+        { 3.5, 4.5, 5.75, 6.5 },
+        { 3.5, 1.5, 5.75, 3.5 },
+        { 10.75, 1.5, 13, 3.5 },
+        { 10.75, 4.5, 13, 6.5 }
+    };
+
+    double robotX = m_swerve.getPose().getX();
+    double robotY = m_swerve.getPose().getY();
+
+    boolean inBumpZone = false;
+
+    for (double[] zone : bumpZones) {
+      if (robotX >= zone[0] && robotX <= zone[2] &&
+          robotY >= zone[1] && robotY <= zone[3]) {
+        inBumpZone = true;
+        break;
+      }
+    }
+
+    if (inBumpZone) {
+
+      double currentHeading = m_swerve.getOdometryHeading().getDegrees();
+
+      // Robot dimensions
+      double length = 0.514;
+      double width = 0.616;
+
+      // Base diagonal angle (~39.84°)
+      double baseAngle = Math.toDegrees(Math.atan(length / width));
+
+      double[] snapAngles = {
+          baseAngle,
+          baseAngle + 90,
+          baseAngle + 180,
+          baseAngle + 270
+      };
+
+      // Find closest snap angle
+      double closestAngle = snapAngles[0];
+      double smallestError = Math.abs(MathUtil.inputModulus(currentHeading - closestAngle, -180, 180));
+
+      for (double angle : snapAngles) {
+        double error = Math.abs(MathUtil.inputModulus(currentHeading - angle, -180, 180));
+        if (error < smallestError) {
+          smallestError = error;
+          closestAngle = angle;
+        }
       }
 
-    });
+      return new ChassisSpeeds(
+          speeds.vxMetersPerSecond,
+          speeds.vyMetersPerSecond,
+          m_hubAimController.calculate(currentHeading, closestAngle));
+
+    } else {
+      return speeds;
+    }
   }
 
   public SwerveDrive getSwerveDrive() {

@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Robot.DriveMode;
+import frc.robot.UserConfig.DriveMode;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -31,7 +31,7 @@ public class RobotContainer {
       OIConstants.kOperatorControllerPort);
 
   // Subsystems
-  private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem(m_driverController);
+  private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem();
   private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
   private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
 
@@ -53,14 +53,6 @@ public class RobotContainer {
       .headingWhile(true);
 
   // Commands
-  private final Command m_driveRobotOrientedAngularVelocity = m_swerveSubsystem
-      .drive(m_robotRelative, () -> m_driverController.axisGreaterThan(3, 0.5).getAsBoolean());
-
-  private final Command m_driveFieldOrientedAngularVelocity = m_swerveSubsystem
-      .drive(m_allianceRelativeAngularVelocity, () -> m_driverController.axisGreaterThan(3, 0.5).getAsBoolean());
-
-  private final Command m_driveFieldOrientedDirectAngle = m_swerveSubsystem
-      .drive(m_allianceRelativeDirectAngle, () -> m_driverController.axisGreaterThan(3, 0.5).getAsBoolean());
 
   private final SendableChooser<Command> m_autoChooser;
 
@@ -106,18 +98,23 @@ public class RobotContainer {
       m_swerveSubsystem.getCurrentCommand().cancel();
     }
 
+    SwerveInputStream newInputStream = null;
+
     switch (driveMode) {
       case RobotOriented:
-        m_swerveSubsystem.setDefaultCommand(m_driveRobotOrientedAngularVelocity);
+        newInputStream = m_robotRelative;
         break;
       case FieldOrientedAngularVelocity:
-        m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedAngularVelocity);
+        newInputStream = m_allianceRelativeAngularVelocity;
         break;
       case FieldOrientedDirectAngle:
-        m_swerveSubsystem.setDefaultCommand(m_driveFieldOrientedDirectAngle);
+        newInputStream = m_allianceRelativeDirectAngle;
       default:
         break;
     }
+
+    m_swerveSubsystem.setDefaultCommand(
+        m_swerveSubsystem.drive(newInputStream, () -> m_driverController.axisGreaterThan(3, 0.5).getAsBoolean()));
   }
 
   public Command getAutonomousCommand() {
