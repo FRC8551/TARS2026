@@ -79,12 +79,12 @@ public class RobotContainer {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
 
     m_driverController.axisGreaterThan(2, 0.5)
-        .onTrue(new InstantCommand(() -> m_intakeSubsystem.runIntake()))
-        .onFalse(new InstantCommand(() -> m_intakeSubsystem.stopIntake()));
+        .whileTrue(m_intakeSubsystem.runIntake())
+        .onFalse(m_intakeSubsystem.stopIntake());
 
     m_driverController.axisGreaterThan(3, 0.5)
-        .whileTrue(new InstantCommand(() -> m_shooterSubsystem.runShooter()).repeatedly())
-        .onFalse(new InstantCommand(() -> m_shooterSubsystem.stopShooter()));
+        .whileTrue(m_shooterSubsystem.runShooter())
+        .onFalse(m_shooterSubsystem.stopShooter());
 
     m_operatorController.povUp().onTrue(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0.2)))
         .onFalse(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0)));

@@ -4,37 +4,92 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.FeedForwardConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.UserConfig;
 import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
 
   private final SparkFlex m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
-  private final SparkMax m_intakePivotMotor = new SparkMax(IntakeConstants.kIntakePivotMotorId, MotorType.kBrushless);
+  private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorId, MotorType.kBrushless);
+
+  private boolean m_pivotCalibrated = false;
 
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
+
+    FeedForwardConfig ffConfig = new FeedForwardConfig();
+    ffConfig.kV(0);
+
+    SparkFlexConfig intakeConfig = new SparkFlexConfig();
+    intakeConfig.closedLoop.pid(0.0001, 0, 0);
+    intakeConfig.closedLoop.feedForward.apply(ffConfig);
+
+    // m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
+
+    SparkFlexConfig pivotConfig = new SparkFlexConfig();
+    pivotConfig.closedLoop.pid(0.0001, 0, 0);
+
+    // m_pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber(IntakeConstants.kSlash + "Intake RPM", m_intakeMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(IntakeConstants.kSlash + "Pivot Position", m_pivotMotor.getEncoder().getPosition());
+    SmartDashboard.putBoolean(IntakeConstants.kSlash + "Pivot Calibrated", m_pivotCalibrated);
+
+    // if (!m_pivotCalibrated) {
+    // if (m_pivotMotor.getOutputCurrent() >
+    // IntakeConstants.kPivotStallCurrentThreshold) {
+    // m_pivotMotor.getEncoder().setPosition(0);
+    // m_pivotCalibrated = true;
+    // } else {
+    // m_pivotMotor.set(-0.2);
+    // }
+    // }
   }
 
-  public void runIntake() {
-    m_intakeMotor.getClosedLoopController().setSetpoint(1500, ControlType.kVelocity);
+  public Command runIntake() {
+    return run(() -> {
+      if (m_intakeMotor.getEncoder().getVelocity() < IntakeConstants.kIntakeRPM - IntakeConstants.kIntakeRPMTolerance
+          && UserConfig.getBeansModeEnabled()) {
+        // Beans Mode 😎
+        m_intakeMotor.set(1);
+      } else {
+        // Burger Mode 🍔
+        m_intakeMotor.getClosedLoopController().setSetpoint(IntakeConstants.kIntakeRPM, ControlType.kVelocity);
+      }
+    });
   }
 
-  public void stopIntake() {
-    m_intakeMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
+  public Command stopIntake() {
+    return run(() -> m_intakeMotor.set(0));
   }
 
-  public void setIntakePivotSpeed(double speed) {
-    m_intakePivotMotor.set(speed);
+  public Command setIntakePivotSpeed(double speed) {
+    return run(() -> m_pivotMotor.set(speed));
+  }
+
+  public Command setPivotPosition(double position) {
+    return run(() -> {
+      if (m_pivotCalibrated) {
+        m_pivotMotor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
+      }
+    });
   }
 }

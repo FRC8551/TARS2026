@@ -11,14 +11,17 @@ public final class Constants {
         public static final File kSwerveConfigurationDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         // Theoretical no-load free speed: 21.97 ft/s
         // More realistic max speed: 16.81 ft/s
-        public static final double kMaxSpeed = Units.feetToMeters(10);
+        public static final double kMaxSpeed = Units.feetToMeters(15);
     }
 
     public static final class IntakeConstants {
         public static final String kSlash = "Intake/";
         public static final int kIntakeMotorId = 13;
-        public static final int kIntakePivotMotorId = 14;
-        public static final int kIntakeCalibrationLimitSwitchId = 0;
+        public static final int kPivotMotorId = 14;
+
+        public static final double kIntakeRPM = 1500;
+        public static final double kIntakeRPMTolerance = 400;
+        public static final double kPivotStallCurrentThreshold = 5;
     }
 
     public static final class ShooterConstants {
@@ -27,12 +30,14 @@ public final class Constants {
         public static final int kUpperIndexerMotorId = 16;
         public static final int kShooterLeftMotorId = 17;
         public static final int kShooterRightMotorId = 18;
+
+        public static final double kShooterRPM = 3900;
+        public static final double kShooterRPMTolerance = 200;
     }
 
     public static final class ClimberConstants {
         public static final String kSlash = "Climber/";
         public static final int kClimberMotorId = 19;
-        public static final int kClimberCalibrationLimitSwitchId = 1;
     }
 
     public static final class OIConstants {

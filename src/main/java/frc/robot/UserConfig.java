@@ -14,6 +14,7 @@ public class UserConfig {
     private static final SendableChooser<DriveMode> m_driveModeChooser = new SendableChooser<>();
     private static final SendableChooser<Boolean> m_hubAimChooser = new SendableChooser<>();
     private static final SendableChooser<Boolean> m_bumpAimChooser = new SendableChooser<>();
+    private static final SendableChooser<Boolean> m_beansModeChooser = new SendableChooser<>();
 
     public static final void initialize() {
         m_driveModeChooser.setDefaultOption("Field-Oriented Direct Angle", DriveMode.FieldOrientedDirectAngle);
@@ -26,9 +27,13 @@ public class UserConfig {
         m_bumpAimChooser.setDefaultOption("Enabled", true);
         m_bumpAimChooser.addOption("Disabled", false);
 
+        m_beansModeChooser.setDefaultOption("Enabled", true);
+        m_beansModeChooser.addOption("Disabled", false);
+
         SmartDashboard.putData("Drive Mode", m_driveModeChooser);
         SmartDashboard.putData("Hub Aim", m_hubAimChooser);
         SmartDashboard.putData("Bump Aim", m_bumpAimChooser);
+        SmartDashboard.putData("Beans Mode", m_beansModeChooser);
     }
 
     public static DriveMode getDriveMode() {
@@ -41,5 +46,9 @@ public class UserConfig {
 
     public static boolean getBumpAimEnabled() {
         return m_bumpAimChooser.getSelected();
+    }
+
+    public static boolean getBeansModeEnabled() {
+        return m_beansModeChooser.getSelected();
     }
 }
