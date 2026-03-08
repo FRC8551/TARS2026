@@ -11,7 +11,6 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -42,7 +41,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
     leftFollowerConfig.apply(rightLeaderConfig);
     leftFollowerConfig.inverted(true);
-    leftFollowerConfig.follow(m_shooterRightMotor);
 
     // SparkFlexConfig leftConfig = new SparkFlexConfig();
 
@@ -70,7 +68,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command runShooter() {
     return run(() -> {
-      m_shooterLeftMotor.getClosedLoopController().setSetpoint(ShooterConstants.kShooterRPM, ControlType.kVelocity);
+      m_shooterLeftMotor.getClosedLoopController().setSetpoint(ShooterConstants.kShooterRPM,
+          ControlType.kVelocity);
       m_shooterRightMotor.getClosedLoopController().setSetpoint(ShooterConstants.kShooterRPM,
           ControlType.kVelocity);
       if (m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM

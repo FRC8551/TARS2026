@@ -29,28 +29,27 @@ public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
 
-    FeedForwardConfig ffConfig = new FeedForwardConfig();
-    ffConfig.kV(0);
-
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
-    intakeConfig.closedLoop.pid(0.0001, 0, 0);
-    intakeConfig.closedLoop.feedForward.apply(ffConfig);
+    intakeConfig.closedLoop.feedForward.kV(0.00019);
+    intakeConfig.closedLoop.pid(0.0005, 0, 0);
+    intakeConfig.inverted(true);
 
-    // m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,
-    // PersistMode.kPersistParameters);
+    m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig pivotConfig = new SparkFlexConfig();
-    pivotConfig.closedLoop.pid(0.0001, 0, 0);
+    pivotConfig.closedLoop.pid(0.01, 0, 0);
+    pivotConfig.inverted(true);
 
-    // m_pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters,
-    // PersistMode.kPersistParameters);
+    m_pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber(IntakeConstants.kSlash + "Intake RPM", m_intakeMotor.getEncoder().getVelocity());
+    SmartDashboard.putNumber(IntakeConstants.kSlash + "Intake Output", m_intakeMotor.getAppliedOutput());
     SmartDashboard.putNumber(IntakeConstants.kSlash + "Pivot Position", m_pivotMotor.getEncoder().getPosition());
+    SmartDashboard.putNumber(IntakeConstants.kSlash + "Pivot Output Current", m_pivotMotor.getOutputCurrent());
     SmartDashboard.putBoolean(IntakeConstants.kSlash + "Pivot Calibrated", m_pivotCalibrated);
 
     // if (!m_pivotCalibrated) {

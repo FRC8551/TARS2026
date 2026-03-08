@@ -86,11 +86,11 @@ public class RobotContainer {
         .whileTrue(m_shooterSubsystem.runShooter())
         .onFalse(m_shooterSubsystem.stopShooter());
 
-    m_operatorController.povUp().onTrue(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0.2)))
-        .onFalse(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0)));
+    m_operatorController.povUp().onTrue(m_intakeSubsystem.setIntakePivotSpeed(0.2))
+        .onFalse(m_intakeSubsystem.setIntakePivotSpeed(0));
 
-    m_operatorController.povDown().onTrue(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(-0.2)))
-        .onFalse(new InstantCommand(() -> m_intakeSubsystem.setIntakePivotSpeed(0)));
+    m_operatorController.povDown().onTrue(m_intakeSubsystem.setIntakePivotSpeed(-0.2))
+        .onFalse(m_intakeSubsystem.setIntakePivotSpeed(0));
   }
 
   public void changeDriveMode(DriveMode driveMode) {

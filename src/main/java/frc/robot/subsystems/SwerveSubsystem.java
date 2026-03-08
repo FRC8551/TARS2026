@@ -116,7 +116,7 @@ public class SwerveSubsystem extends SubsystemBase {
       if ((mt1.tagCount == 1 && mt1.rawFiducials.length == 1 && mt1.rawFiducials[0].ambiguity <= 0.7
           && mt1.rawFiducials[0].distToCamera <= 3) ||
           (mt1.tagCount >= 2)) {
-        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE));
+        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 2));
         m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
       }
 

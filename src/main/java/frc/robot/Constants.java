@@ -31,7 +31,7 @@ public final class Constants {
         public static final int kShooterLeftMotorId = 17;
         public static final int kShooterRightMotorId = 18;
 
-        public static final double kShooterRPM = 3900;
+        public static final double kShooterRPM = 3000;
         public static final double kShooterRPMTolerance = 200;
     }
 
