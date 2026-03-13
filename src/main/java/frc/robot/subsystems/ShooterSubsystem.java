@@ -74,10 +74,10 @@ public class ShooterSubsystem extends SubsystemBase {
           ControlType.kVelocity);
       if (m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
           - ShooterConstants.kShooterRPMTolerance) {
-        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.7);
+        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.75);
         m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.85);
       } else {
-        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.31);
+        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.37);
         m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.85);
       }
     });

@@ -32,11 +32,12 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeConfig.closedLoop.feedForward.kV(0.00019);
     intakeConfig.closedLoop.pid(0.0005, 0, 0);
     intakeConfig.inverted(true);
+    intakeConfig.smartCurrentLimit(120);
 
     m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig pivotConfig = new SparkFlexConfig();
-    pivotConfig.closedLoop.pid(0.01, 0, 0);
+    pivotConfig.closedLoop.pid(0.04, 0, 0);
     pivotConfig.inverted(true);
 
     m_pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -51,15 +52,15 @@ public class IntakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(IntakeConstants.kSlash + "Pivot Output Current", m_pivotMotor.getOutputCurrent());
     SmartDashboard.putBoolean(IntakeConstants.kSlash + "Pivot Calibrated", m_pivotCalibrated);
 
-    // if (!m_pivotCalibrated) {
-    // if (m_pivotMotor.getOutputCurrent() >
-    // IntakeConstants.kPivotStallCurrentThreshold) {
-    // m_pivotMotor.getEncoder().setPosition(0);
-    // m_pivotCalibrated = true;
-    // } else {
-    // m_pivotMotor.set(-0.2);
-    // }
-    // }
+    if (!m_pivotCalibrated) {
+      if (m_pivotMotor.getOutputCurrent() > IntakeConstants.kPivotStallCurrentThreshold) {
+        m_pivotMotor.set(0);
+        m_pivotMotor.getEncoder().setPosition(0);
+        m_pivotCalibrated = true;
+      } else {
+        m_pivotMotor.set(-0.1);
+      }
+    }
   }
 
   public Command runIntake() {
@@ -67,7 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
       if (m_intakeMotor.getEncoder().getVelocity() < IntakeConstants.kIntakeRPM - IntakeConstants.kIntakeRPMTolerance
           && UserConfig.getBeansModeEnabled()) {
         // Beans Mode 😎
-        m_intakeMotor.set(1);
+        m_intakeMotor.setVoltage(12);
       } else {
         // Burger Mode 🍔
         m_intakeMotor.getClosedLoopController().setSetpoint(IntakeConstants.kIntakeRPM, ControlType.kVelocity);

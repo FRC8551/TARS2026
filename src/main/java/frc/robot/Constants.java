@@ -21,7 +21,7 @@ public final class Constants {
 
         public static final double kIntakeRPM = 1500;
         public static final double kIntakeRPMTolerance = 400;
-        public static final double kPivotStallCurrentThreshold = 5;
+        public static final double kPivotStallCurrentThreshold = 35;
     }
 
     public static final class ShooterConstants {
