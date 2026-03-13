@@ -37,6 +37,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SparkMaxConfig upperIndexerConfig = new SparkMaxConfig();
 
     upperIndexerConfig.apply(lowerIndexerConfig);
+    upperIndexerConfig.idleMode(IdleMode.kCoast);
 
     m_lowerIndexerMotor.configure(lowerIndexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_upperIndexerMotor.configure(upperIndexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -70,11 +71,11 @@ public class ShooterSubsystem extends SubsystemBase {
           ControlType.kVelocity);
       if (m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
           - ShooterConstants.kShooterRPMTolerance) {
-        m_lowerIndexerMotor.set(0.75);
-        m_upperIndexerMotor.set(0.85);
+        m_lowerIndexerMotor.set(0.8);
+        m_upperIndexerMotor.set(0.75);
       } else {
-        m_lowerIndexerMotor.set(0.37);
-        m_upperIndexerMotor.set(0.85);
+        m_lowerIndexerMotor.set(0.0);
+        m_upperIndexerMotor.set(0.75);
       }
     });
   }

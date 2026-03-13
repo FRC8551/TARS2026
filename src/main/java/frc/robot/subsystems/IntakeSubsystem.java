@@ -30,9 +30,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
     intakeConfig.closedLoop.feedForward.kV(0.00019);
-    intakeConfig.closedLoop.pid(0.0005, 0, 0);
+    intakeConfig.closedLoop.pid(0.0001, 0, 0);
     intakeConfig.inverted(true);
-    intakeConfig.smartCurrentLimit(120);
+    intakeConfig.smartCurrentLimit(80);
 
     m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
