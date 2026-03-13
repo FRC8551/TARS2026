@@ -4,14 +4,14 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,8 +21,10 @@ import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
 
-  private final VictorSPX m_lowerIndexerMotor = new VictorSPX(ShooterConstants.kLowerIndexerMotorId);
-  private final VictorSPX m_upperIndexerMotor = new VictorSPX(ShooterConstants.kUpperIndexerMotorId);
+  private final SparkMax m_lowerIndexerMotor = new SparkMax(ShooterConstants.kLowerIndexerMotorId,
+      MotorType.kBrushless);
+  private final SparkMax m_upperIndexerMotor = new SparkMax(ShooterConstants.kUpperIndexerMotorId,
+      MotorType.kBrushless);
   private final SparkFlex m_shooterLeftMotor = new SparkFlex(ShooterConstants.kShooterLeftMotorId,
       MotorType.kBrushless);
   private final SparkFlex m_shooterRightMotor = new SparkFlex(ShooterConstants.kShooterRightMotorId,
@@ -31,33 +33,27 @@ public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
 
-    SparkFlexConfig rightLeaderConfig = new SparkFlexConfig();
-    SparkFlexConfig leftFollowerConfig = new SparkFlexConfig();
+    SparkMaxConfig lowerIndexerConfig = new SparkMaxConfig();
+    SparkMaxConfig upperIndexerConfig = new SparkMaxConfig();
 
-    rightLeaderConfig.closedLoop.feedForward.kV(0.00015);
-    rightLeaderConfig.closedLoop.p(0.001);
-    rightLeaderConfig.idleMode(IdleMode.kCoast);
-    rightLeaderConfig.inverted(false);
+    upperIndexerConfig.apply(lowerIndexerConfig);
 
-    leftFollowerConfig.apply(rightLeaderConfig);
-    leftFollowerConfig.inverted(true);
+    m_lowerIndexerMotor.configure(lowerIndexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_upperIndexerMotor.configure(upperIndexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // SparkFlexConfig leftConfig = new SparkFlexConfig();
+    SparkFlexConfig shooterRightConfig = new SparkFlexConfig();
+    SparkFlexConfig shooterLeftConfig = new SparkFlexConfig();
 
-    // leftConfig.inverted(true);
-    // leftConfig.idleMode(IdleMode.kCoast);
-    // leftConfig.closedLoop.pid(0.001, 0, 0);
-    // leftConfig.closedLoop.feedForward.apply(ffConfig);
+    shooterRightConfig.closedLoop.feedForward.kV(0.00015);
+    shooterRightConfig.closedLoop.p(0.001);
+    shooterRightConfig.idleMode(IdleMode.kCoast);
+    shooterRightConfig.inverted(false);
 
-    // SparkFlexConfig rightConfig = new SparkFlexConfig();
+    shooterLeftConfig.apply(shooterRightConfig);
+    shooterLeftConfig.inverted(true);
 
-    // rightConfig.inverted(false);
-    // rightConfig.idleMode(IdleMode.kCoast);
-    // rightConfig.closedLoop.pid(0.001, 0, 0);
-    // rightConfig.closedLoop.feedForward.apply(ffConfig);
-
-    m_shooterLeftMotor.configure(leftFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_shooterRightMotor.configure(rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_shooterLeftMotor.configure(shooterLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_shooterRightMotor.configure(shooterRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
@@ -74,11 +70,11 @@ public class ShooterSubsystem extends SubsystemBase {
           ControlType.kVelocity);
       if (m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
           - ShooterConstants.kShooterRPMTolerance) {
-        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.75);
-        m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.85);
+        m_lowerIndexerMotor.set(0.75);
+        m_upperIndexerMotor.set(0.85);
       } else {
-        m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.37);
-        m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0.85);
+        m_lowerIndexerMotor.set(0.37);
+        m_upperIndexerMotor.set(0.85);
       }
     });
   }
@@ -87,8 +83,8 @@ public class ShooterSubsystem extends SubsystemBase {
     return run(() -> {
       m_shooterLeftMotor.set(0);
       m_shooterRightMotor.set(0);
-      m_lowerIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
-      m_upperIndexerMotor.set(VictorSPXControlMode.PercentOutput, 0);
+      m_lowerIndexerMotor.set(0);
+      m_upperIndexerMotor.set(0);
     });
   }
 }
