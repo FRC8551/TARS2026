@@ -72,7 +72,10 @@ public class RobotContainer {
   }
 
   private void registerNamedCommands() {
-    NamedCommands.registerCommand("Nothing", Commands.none());
+    NamedCommands.registerCommand("Run Intake", m_intakeSubsystem.runIntake());
+    NamedCommands.registerCommand("Stop Intake", m_intakeSubsystem.stopIntake());
+    NamedCommands.registerCommand("Run Shooter", m_shooterSubsystem.runShooter());
+    NamedCommands.registerCommand("Stop Shooter", m_shooterSubsystem.stopShooter());
   }
 
   private void configureBindings() {

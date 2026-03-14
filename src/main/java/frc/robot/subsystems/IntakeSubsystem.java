@@ -65,14 +65,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public Command runIntake() {
     return run(() -> {
-      if (m_intakeMotor.getEncoder().getVelocity() < IntakeConstants.kIntakeRPM - IntakeConstants.kIntakeRPMTolerance
-          && UserConfig.getBeansModeEnabled()) {
-        // Beans Mode 😎
-        m_intakeMotor.setVoltage(12);
-      } else {
-        // Burger Mode 🍔
-        m_intakeMotor.getClosedLoopController().setSetpoint(IntakeConstants.kIntakeRPM, ControlType.kVelocity);
-      }
+      // if (m_intakeMotor.getEncoder().getVelocity() < IntakeConstants.kIntakeRPM -
+      // IntakeConstants.kIntakeRPMTolerance
+      // && UserConfig.getBeansModeEnabled()) {
+      // // Beans Mode 😎
+      // m_intakeMotor.setVoltage(12);
+      // } else {
+      // // Burger Mode 🍔
+      // m_intakeMotor.getClosedLoopController().setSetpoint(IntakeConstants.kIntakeRPM,
+      // ControlType.kVelocity);
+      // }
+      m_intakeMotor.set(0.5);
     });
   }
 

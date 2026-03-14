@@ -71,7 +71,7 @@ public class ShooterSubsystem extends SubsystemBase {
           ControlType.kVelocity);
       if (m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
           - ShooterConstants.kShooterRPMTolerance) {
-        m_lowerIndexerMotor.set(0.8);
+        m_lowerIndexerMotor.set(0.55);
         m_upperIndexerMotor.set(0.75);
       } else {
         m_lowerIndexerMotor.set(0.0);
