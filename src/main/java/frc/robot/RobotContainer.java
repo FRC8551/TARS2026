@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OIConstants;
@@ -82,6 +81,10 @@ public class RobotContainer {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
 
     m_driverController.axisGreaterThan(2, 0.5)
+        .whileTrue(m_intakeSubsystem.runIntake())
+        .onFalse(m_intakeSubsystem.stopIntake());
+
+    m_operatorController.button(7)
         .whileTrue(m_intakeSubsystem.runIntake())
         .onFalse(m_intakeSubsystem.stopIntake());
 
