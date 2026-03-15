@@ -107,27 +107,29 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.getEntry("Field/Fuel").setDoubleArray(arr);
 
     // Limelight localization
-    final String[] limelights = { "limelight" };
+    if (UserConfig.getAprilTagLocalizationEnabled()) {
+      final String[] limelights = { "limelight" };
 
-    for (String ll : limelights) {
-      // MegaTag1
-      PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(ll);
+      for (String ll : limelights) {
+        // MegaTag1
+        PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(ll);
 
-      if ((mt1.tagCount == 1 && mt1.rawFiducials.length == 1 && mt1.rawFiducials[0].ambiguity <= 0.7
-          && mt1.rawFiducials[0].distToCamera <= 3) ||
-          (mt1.tagCount >= 2)) {
-        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 2));
-        m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
-      }
+        if ((mt1.tagCount == 1 && mt1.rawFiducials.length == 1 && mt1.rawFiducials[0].ambiguity <= 0.7
+            && mt1.rawFiducials[0].distToCamera <= 3) ||
+            (mt1.tagCount >= 2)) {
+          m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 2));
+          m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
+        }
 
-      // MegaTag2
-      LimelightHelpers.SetRobotOrientation(ll,
-          m_swerve.swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-      PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(ll);
+        // MegaTag2
+        LimelightHelpers.SetRobotOrientation(ll,
+            m_swerve.swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(ll);
 
-      if (Math.abs(m_swerve.getGyro().getYawAngularVelocity().magnitude()) <= 360 && mt2.tagCount > 0) {
-        m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, Double.MAX_VALUE));
-        m_swerve.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        if (Math.abs(m_swerve.getGyro().getYawAngularVelocity().magnitude()) <= 360 && mt2.tagCount > 0) {
+          m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, Double.MAX_VALUE));
+          m_swerve.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        }
       }
     }
   }

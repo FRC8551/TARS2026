@@ -15,6 +15,7 @@ public class UserConfig {
     private static final SendableChooser<Boolean> m_hubAimChooser = new SendableChooser<>();
     private static final SendableChooser<Boolean> m_bumpAimChooser = new SendableChooser<>();
     private static final SendableChooser<Boolean> m_beansModeChooser = new SendableChooser<>();
+    private static final SendableChooser<Boolean> m_apriltagLocalizationChooser = new SendableChooser<>();
 
     public static final void initialize() {
         m_driveModeChooser.setDefaultOption("Field-Oriented Direct Angle", DriveMode.FieldOrientedDirectAngle);
@@ -30,10 +31,14 @@ public class UserConfig {
         m_beansModeChooser.setDefaultOption("Enabled", true);
         m_beansModeChooser.addOption("Disabled", false);
 
+        m_apriltagLocalizationChooser.setDefaultOption("Enabled", true);
+        m_apriltagLocalizationChooser.addOption("Disabled", false);
+
         SmartDashboard.putData("Drive Mode", m_driveModeChooser);
         SmartDashboard.putData("Hub Aim", m_hubAimChooser);
         SmartDashboard.putData("Bump Aim", m_bumpAimChooser);
         SmartDashboard.putData("Beans Mode", m_beansModeChooser);
+        SmartDashboard.putData("AprilTag Localization", m_apriltagLocalizationChooser);
     }
 
     public static DriveMode getDriveMode() {
@@ -50,5 +55,9 @@ public class UserConfig {
 
     public static boolean getBeansModeEnabled() {
         return m_beansModeChooser.getSelected();
+    }
+
+    public static boolean getAprilTagLocalizationEnabled() {
+        return m_apriltagLocalizationChooser.getSelected();
     }
 }
