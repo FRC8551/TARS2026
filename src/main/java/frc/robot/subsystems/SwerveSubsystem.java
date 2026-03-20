@@ -42,7 +42,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private final SwerveDrive m_swerve;
 
-  private final PIDController m_hubAimController = new PIDController(0.08, 0, 0);
+  private final PIDController m_aimController = new PIDController(0.08, 0, 0.002);
+
+  private static boolean m_isAimedAtHub = false;
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
@@ -59,11 +61,11 @@ public class SwerveSubsystem extends SubsystemBase {
     // Swerve configuration
     m_swerve.setAngularVelocityCompensation(true, true, 0.1);
     m_swerve.setAutoCenteringModules(false);
-    // m_swerve.setChassisDiscretization(true, 0.02); // Change this to true
+    m_swerve.setChassisDiscretization(true, 0.02); // Change this to true
     m_swerve.setCosineCompensator(!SwerveDriveTelemetry.isSimulation);
     m_swerve.setHeadingCorrection(true);
-    // m_swerve.setModuleEncoderAutoSynchronize(true, 1);
-    // m_swerve.setModuleStateOptimization(true);
+    m_swerve.setModuleEncoderAutoSynchronize(true, 1);
+    m_swerve.setModuleStateOptimization(true);
     m_swerve.setMotorIdleMode(false);
 
     if (SwerveDriveTelemetry.isSimulation) {
@@ -72,7 +74,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     setupPathPlanner();
 
-    m_hubAimController.enableContinuousInput(0, 359);
+    m_aimController.enableContinuousInput(-180, 180);
+    m_aimController.setTolerance(10);
   }
 
   @Override
@@ -80,6 +83,9 @@ public class SwerveSubsystem extends SubsystemBase {
     ChassisSpeeds robotVelocity = m_swerve.getRobotVelocity();
     double velocity = Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) * 2.23694;
     SmartDashboard.putNumber(SwerveConstants.kSlash + "Speedometer (MPH)", Math.round(velocity * 1000.0) / 1000.0);
+
+    // Store hub aim status periodically for use in commands
+    m_isAimedAtHub = m_aimController.atSetpoint();
 
     double[] fuel = SmartDashboard.getEntry("Fuel").getDoubleArray(new double[0]);
     Pose2d robotPose = m_swerve.getPose();
@@ -203,7 +209,7 @@ public class SwerveSubsystem extends SubsystemBase {
       return new ChassisSpeeds(
           speeds.vxMetersPerSecond,
           speeds.vyMetersPerSecond,
-          m_hubAimController.calculate(m_swerve.getOdometryHeading().getDegrees(),
+          m_aimController.calculate(m_swerve.getOdometryHeading().getDegrees(),
               angle.getDegrees()));
     } else {
       return speeds;
@@ -266,7 +272,7 @@ public class SwerveSubsystem extends SubsystemBase {
       return new ChassisSpeeds(
           speeds.vxMetersPerSecond,
           speeds.vyMetersPerSecond,
-          m_hubAimController.calculate(currentHeading, closestAngle));
+          m_aimController.calculate(currentHeading, closestAngle));
 
     } else {
       return speeds;
@@ -280,6 +286,10 @@ public class SwerveSubsystem extends SubsystemBase {
   private boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
+  }
+
+  public static boolean isAimedAtHub() {
+    return m_isAimedAtHub;
   }
 
   public void zeroGyro() {

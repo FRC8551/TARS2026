@@ -63,23 +63,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command runIntake() {
-    return run(() -> {
-      // if (m_intakeMotor.getEncoder().getVelocity() < IntakeConstants.kIntakeRPM -
-      // IntakeConstants.kIntakeRPMTolerance
-      // && UserConfig.getBeansModeEnabled()) {
-      // // Beans Mode 😎
-      // m_intakeMotor.setVoltage(12);
-      // } else {
-      // // Burger Mode 🍔
-      // m_intakeMotor.getClosedLoopController().setSetpoint(IntakeConstants.kIntakeRPM,
-      // ControlType.kVelocity);
-      // }
-      m_intakeMotor.set(0.5);
-    });
+    return runOnce(() -> m_intakeMotor.set(0.5));
   }
 
   public Command stopIntake() {
-    return run(() -> m_intakeMotor.set(0));
+    return runOnce(() -> m_intakeMotor.set(0));
   }
 
   public Command setIntakePivotSpeed(double speed) {
@@ -87,7 +75,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command setPivotPosition(double position) {
-    return run(() -> {
+    return runOnce(() -> {
       if (m_pivotCalibrated) {
         m_pivotMotor.getClosedLoopController().setSetpoint(position, ControlType.kPosition);
       }
