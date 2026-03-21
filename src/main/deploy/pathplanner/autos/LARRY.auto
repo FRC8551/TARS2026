@@ -21,7 +21,19 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 3.19
+                        "waitTime": 3.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Run Intake"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 8.5
                       }
                     },
                     {
@@ -33,13 +45,19 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 5.0
+                        "waitTime": 4.0
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "Stop Shooter"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Stop Intake"
                       }
                     }
                   ]
@@ -51,7 +69,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

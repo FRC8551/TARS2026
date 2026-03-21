@@ -75,7 +75,7 @@ public class SwerveSubsystem extends SubsystemBase {
     setupPathPlanner();
 
     m_aimController.enableContinuousInput(-180, 180);
-    m_aimController.setTolerance(10);
+    m_aimController.setTolerance(15);
   }
 
   @Override

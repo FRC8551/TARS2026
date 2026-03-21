@@ -19,7 +19,7 @@ public final class Constants {
         public static final int kIntakeMotorId = 13;
         public static final int kPivotMotorId = 14;
 
-        public static final double kIntakeRPM = 2000;
+        public static final double kIntakeRPM = 5400;
         public static final double kIntakeRPMTolerance = 400;
         public static final double kPivotStallCurrentThreshold = 35;
     }
@@ -31,8 +31,8 @@ public final class Constants {
         public static final int kShooterLeftMotorId = 17;
         public static final int kShooterRightMotorId = 18;
 
-        public static final double kShooterRPM = 2800;
-        public static final double kShooterRPMTolerance = 200;
+        public static final double kShooterRPM = 2900;
+        public static final double kShooterRPMTolerance = 150;
     }
 
     public static final class ClimberConstants {
