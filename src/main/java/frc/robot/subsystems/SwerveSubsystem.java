@@ -114,7 +114,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Limelight localization
     if (UserConfig.getAprilTagLocalizationEnabled()) {
-      final String[] limelights = { "limelight" };
+      final String[] limelights = { "limelight-better" };
 
       for (String ll : limelights) {
         // MegaTag1

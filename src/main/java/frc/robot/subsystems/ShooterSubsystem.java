@@ -73,7 +73,7 @@ public class ShooterSubsystem extends SubsystemBase {
           ShooterConstants.kShooterRPM, ControlType.kVelocity);
 
       // Always run upper indexer
-      m_upperIndexerMotor.set(0.80);
+      m_upperIndexerMotor.set(0.75);
 
       // Conditions
       boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
@@ -86,7 +86,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
       // Lower indexer gating
       if (readyToFeed) {
-        m_lowerIndexerMotor.set(0.65);
+        m_lowerIndexerMotor.set(0.75);
       } else {
         m_lowerIndexerMotor.set(0.0);
       }
