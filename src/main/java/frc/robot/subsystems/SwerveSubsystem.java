@@ -84,6 +84,9 @@ public class SwerveSubsystem extends SubsystemBase {
     double velocity = Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) * 2.23694;
     SmartDashboard.putNumber(SwerveConstants.kSlash + "Speedometer (MPH)", Math.round(velocity * 1000.0) / 1000.0);
 
+    SmartDashboard.putNumber(SwerveConstants.kSlash + "Hub Distance",
+        Math.round(getDistanceToHub(m_swerve.getPose()) * 1000.0) / 1000.0);
+
     // Store hub aim status periodically for use in commands
     m_isAimedAtHub = m_aimController.atSetpoint();
 
@@ -290,6 +293,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static boolean isAimedAtHub() {
     return m_isAimedAtHub;
+  }
+
+  public static double getDistanceToHub(Pose2d robotPose) {
+    Translation2d targetTranslation = DriverStation.getAlliance()
+        .orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+            ? new Translation2d(11.917, 4.030)
+            : new Translation2d(4.623, 4.030);
+
+    return robotPose.getTranslation().getDistance(targetTranslation);
   }
 
   public void zeroGyro() {
