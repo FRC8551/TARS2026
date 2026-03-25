@@ -22,6 +22,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SparkFlex m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
   private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorId, MotorType.kBrushless);
 
+  private boolean m_intakeActive = false;
   private boolean m_pivotCalibrated = false;
 
   /** Creates a new IntakeSubsystem. */
@@ -53,21 +54,27 @@ public class IntakeSubsystem extends SubsystemBase {
 
     if (!m_pivotCalibrated) {
       if (m_pivotMotor.getOutputCurrent() > IntakeConstants.kPivotStallCurrentThreshold) {
-        m_pivotMotor.set(0);
         m_pivotMotor.getEncoder().setPosition(0);
+        m_pivotMotor.set(0);
         m_pivotCalibrated = true;
       } else {
         m_pivotMotor.set(-0.1);
       }
     }
+
+    if (m_intakeActive) {
+      m_intakeMotor.set(0.5);
+    } else {
+      m_intakeMotor.set(0);
+    }
   }
 
   public Command runIntake() {
-    return runOnce(() -> m_intakeMotor.set(0.5));
+    return runOnce(() -> m_intakeActive = true);
   }
 
   public Command stopIntake() {
-    return runOnce(() -> m_intakeMotor.set(0));
+    return runOnce(() -> m_intakeActive = false);
   }
 
   public Command setIntakePivotSpeed(double speed) {

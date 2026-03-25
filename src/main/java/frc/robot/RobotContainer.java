@@ -80,7 +80,7 @@ public class RobotContainer {
   private void configureBindings() {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
 
-    m_driverController.axisGreaterThan(2, 0.5)
+    m_driverController.leftTrigger(0.5)
         .whileTrue(m_intakeSubsystem.runIntake())
         .onFalse(m_intakeSubsystem.stopIntake());
 
@@ -88,7 +88,7 @@ public class RobotContainer {
         .whileTrue(m_intakeSubsystem.runIntake())
         .onFalse(m_intakeSubsystem.stopIntake());
 
-    m_driverController.axisGreaterThan(3, 0.5)
+    m_driverController.rightTrigger(0.5)
         .whileTrue(m_shooterSubsystem.runShooter())
         .onFalse(m_shooterSubsystem.stopShooter());
 
