@@ -31,8 +31,8 @@ public final class Constants {
         public static final int kShooterLeftMotorId = 17;
         public static final int kShooterRightMotorId = 18;
 
-        public static final double kShooterRPM = 2900;
-        public static final double kShooterRPMTolerance = 150;
+        public static final double kShooterRPM = 2800;
+        public static final double kShooterRPMTolerance = 200;
     }
 
     public static final class ClimberConstants {
