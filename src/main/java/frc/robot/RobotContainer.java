@@ -48,7 +48,9 @@ public class RobotContainer {
       .allianceRelativeControl(true);
 
   private final SwerveInputStream m_allianceRelativeDirectAngle = m_allianceRelativeAngularVelocity.copy()
-      .withControllerHeadingAxis(() -> -m_driverController.getRightX(), () -> -m_driverController.getRightY())
+      .withControllerHeadingAxis(
+          () -> m_driverController.getRightX() * (m_swerveSubsystem.isRedAlliance() ? 1 : -1),
+          () -> m_driverController.getRightY() * (m_swerveSubsystem.isRedAlliance() ? 1 : -1))
       .headingWhile(true);
 
   // Commands

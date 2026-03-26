@@ -301,7 +301,7 @@ public class SwerveSubsystem extends SubsystemBase {
     return m_swerve;
   }
 
-  private boolean isRedAlliance() {
+  public boolean isRedAlliance() {
     var alliance = DriverStation.getAlliance();
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
