@@ -68,15 +68,15 @@ public class ShooterSubsystem extends SubsystemBase {
     if (m_shooterActive) {
       // Run flywheel
       m_shooterLeftMotor.getClosedLoopController().setSetpoint(
-          ShooterConstants.kShooterRPM, ControlType.kVelocity);
+          UserConfig.getShooterRPM(), ControlType.kVelocity);
       m_shooterRightMotor.getClosedLoopController().setSetpoint(
-          ShooterConstants.kShooterRPM, ControlType.kVelocity);
+          UserConfig.getShooterRPM(), ControlType.kVelocity);
 
       // Always run upper indexer
       m_upperIndexerMotor.set(0.75);
 
       // Conditions
-      boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > ShooterConstants.kShooterRPM
+      boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > UserConfig.getShooterRPM()
           - ShooterConstants.kShooterRPMTolerance;
 
       boolean aimEnabled = UserConfig.getHubAimEnabled();
@@ -104,5 +104,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command stopShooter() {
     return runOnce(() -> m_shooterActive = false);
+  }
+
+  public Command reverseIndexers() {
+    return run(() -> {
+      m_lowerIndexerMotor.set(-0.5);
+      m_upperIndexerMotor.set(-0.5);
+    });
   }
 }

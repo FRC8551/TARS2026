@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.ShooterConstants;
 
 public class UserConfig {
 
@@ -39,6 +40,7 @@ public class UserConfig {
         SmartDashboard.putData("Bump Aim", m_bumpAimChooser);
         SmartDashboard.putData("Beans Mode", m_beansModeChooser);
         SmartDashboard.putData("AprilTag Localization", m_apriltagLocalizationChooser);
+        SmartDashboard.putNumber("Shooter RPM Tuner", ShooterConstants.kShooterRPM);
     }
 
     public static DriveMode getDriveMode() {
@@ -59,5 +61,9 @@ public class UserConfig {
 
     public static boolean getAprilTagLocalizationEnabled() {
         return m_apriltagLocalizationChooser.getSelected();
+    }
+
+    public static double getShooterRPM() {
+        return SmartDashboard.getNumber("Shooter RPM Tuner", ShooterConstants.kShooterRPM);
     }
 }

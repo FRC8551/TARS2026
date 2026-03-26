@@ -98,6 +98,10 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_intakeSubsystem.setIntakePivotSpeed(-0.2))
         .onFalse(m_intakeSubsystem.setIntakePivotSpeed(0));
 
+    m_operatorController.x().whileTrue(m_intakeSubsystem.reverseIntake());
+
+    m_operatorController.y().whileTrue(m_shooterSubsystem.reverseIndexers());
+
     m_operatorController.a().onTrue(m_intakeSubsystem.setPivotPosition(0));
 
     m_operatorController.y().onTrue(m_intakeSubsystem.setPivotPosition(16));
