@@ -88,6 +88,8 @@ public class RobotContainer {
         .whileTrue(m_intakeSubsystem.runIntake())
         .onFalse(m_intakeSubsystem.stopIntake());
 
+    m_operatorController.button(8).onTrue(m_intakeSubsystem.beansIntake()).onFalse(m_intakeSubsystem.toastIntake());
+
     m_driverController.rightTrigger(0.5)
         .whileTrue(m_shooterSubsystem.runShooter())
         .onFalse(m_shooterSubsystem.stopShooter());

@@ -23,6 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorId, MotorType.kBrushless);
 
   private boolean m_intakeActive = false;
+  private boolean m_beansMode = false;
   private boolean m_intakeRevsered = false;
   private boolean m_pivotCalibrated = false;
 
@@ -65,7 +66,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     if (m_intakeActive) {
       if (!m_intakeRevsered) {
-        m_intakeMotor.set(0.5);
+        if (m_beansMode) {
+          m_intakeMotor.set(1);
+        } else {
+          m_intakeMotor.set(0.5);
+        }
       } else {
         m_intakeMotor.set(-0.5);
       }
@@ -78,6 +83,18 @@ public class IntakeSubsystem extends SubsystemBase {
     return run(() -> {
       m_intakeRevsered = false;
       m_intakeActive = true;
+    });
+  }
+
+  public Command beansIntake() {
+    return runOnce(() -> {
+      m_beansMode = true;
+    });
+  }
+
+  public Command toastIntake() {
+    return runOnce(() -> {
+      m_beansMode = false;
     });
   }
 

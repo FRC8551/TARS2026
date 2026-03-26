@@ -127,7 +127,13 @@ public class SwerveSubsystem extends SubsystemBase {
             && mt1.rawFiducials[0].distToCamera <= 3) ||
             (mt1.tagCount >= 2)) {
           m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 2));
-          m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
+          // m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5,
+          // Double.MAX_VALUE));
+          if (isRedAlliance()) {
+            m_swerve.addVisionMeasurement(mt1.pose.rotateBy(Rotation2d.fromDegrees(180)), mt1.timestampSeconds);
+          } else {
+            m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
+          }
         }
 
         // MegaTag2
@@ -136,8 +142,14 @@ public class SwerveSubsystem extends SubsystemBase {
         PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(ll);
 
         if (Math.abs(m_swerve.getGyro().getYawAngularVelocity().magnitude()) <= 360 && mt2.tagCount > 0) {
-          m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, Double.MAX_VALUE));
-          m_swerve.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+          m_swerve.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7,
+              Double.MAX_VALUE));
+          if (isRedAlliance()) {
+            m_swerve.addVisionMeasurement(mt1.pose.rotateBy(Rotation2d.fromDegrees(180)),
+                mt1.timestampSeconds);
+          } else {
+            m_swerve.addVisionMeasurement(mt1.pose, mt1.timestampSeconds);
+          }
         }
       }
     }
