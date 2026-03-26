@@ -76,8 +76,9 @@ public class ShooterSubsystem extends SubsystemBase {
       m_upperIndexerMotor.set(0.75);
 
       // Conditions
-      boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > UserConfig.getShooterRPM()
-          - ShooterConstants.kShooterRPMTolerance;
+      boolean flywheelReady = m_shooterRightMotor.getEncoder()
+          .getVelocity() > getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose))
+              - ShooterConstants.kShooterRPMTolerance;
 
       boolean aimEnabled = UserConfig.getHubAimEnabled();
       boolean aimed = SwerveSubsystem.isAimedAtHub();
