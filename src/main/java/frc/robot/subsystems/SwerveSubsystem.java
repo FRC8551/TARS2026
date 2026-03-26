@@ -45,6 +45,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final PIDController m_aimController = new PIDController(0.08, 0, 0.002);
 
   private static boolean m_isAimedAtHub = false;
+  public static Pose2d m_robotPose = new Pose2d();
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
@@ -89,6 +90,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Store hub aim status periodically for use in commands
     m_isAimedAtHub = m_aimController.atSetpoint();
+
+    m_robotPose = m_swerve.getPose();
 
     double[] fuel = SmartDashboard.getEntry("Fuel").getDoubleArray(new double[0]);
     Pose2d robotPose = m_swerve.getPose();

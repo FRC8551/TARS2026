@@ -68,9 +68,9 @@ public class ShooterSubsystem extends SubsystemBase {
     if (m_shooterActive) {
       // Run flywheel
       m_shooterLeftMotor.getClosedLoopController().setSetpoint(
-          UserConfig.getShooterRPM(), ControlType.kVelocity);
+          getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose)), ControlType.kVelocity);
       m_shooterRightMotor.getClosedLoopController().setSetpoint(
-          UserConfig.getShooterRPM(), ControlType.kVelocity);
+          getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose)), ControlType.kVelocity);
 
       // Always run upper indexer
       m_upperIndexerMotor.set(0.75);
@@ -96,6 +96,37 @@ public class ShooterSubsystem extends SubsystemBase {
       m_lowerIndexerMotor.set(0);
       m_upperIndexerMotor.set(0);
     }
+  }
+
+  private double getRPM(double distanceMeters) {
+    // Known data points: {distance, RPM}
+    double[][] dataPoints = {
+        { 1.6, 2300 },
+        { 2.5, 2650 },
+        { 3.5, 2900 },
+        { 4.0, 3050 },
+        { 5.0, 3200 },
+        { 5.4, 3400 }
+    };
+
+    // Clamp to bounds
+    if (distanceMeters <= dataPoints[0][0])
+      return dataPoints[0][1];
+    if (distanceMeters >= dataPoints[dataPoints.length - 1][0])
+      return dataPoints[dataPoints.length - 1][1];
+
+    // Find surrounding data points and linearly interpolate
+    for (int i = 0; i < dataPoints.length - 1; i++) {
+      double d0 = dataPoints[i][0], rpm0 = dataPoints[i][1];
+      double d1 = dataPoints[i + 1][0], rpm1 = dataPoints[i + 1][1];
+
+      if (distanceMeters >= d0 && distanceMeters <= d1) {
+        double t = (distanceMeters - d0) / (d1 - d0);
+        return rpm0 + t * (rpm1 - rpm0);
+      }
+    }
+
+    return -1; // Unreachable
   }
 
   public Command runShooter() {
