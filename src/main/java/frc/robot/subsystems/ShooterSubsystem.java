@@ -51,6 +51,8 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterRightConfig.closedLoop.feedForward.kV(0.00015);
     shooterRightConfig.closedLoop.p(0.001);
     shooterRightConfig.idleMode(IdleMode.kCoast);
+    shooterRightConfig.smartCurrentLimit(120);
+    shooterRightConfig.closedLoopRampRate(0);
     shooterRightConfig.inverted(false);
 
     shooterLeftConfig.apply(shooterRightConfig);
@@ -67,16 +69,24 @@ public class ShooterSubsystem extends SubsystemBase {
 
     if (m_shooterActive) {
       // Run flywheel
-      m_shooterLeftMotor.getClosedLoopController().setSetpoint(
-          getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose)), ControlType.kVelocity);
-      m_shooterRightMotor.getClosedLoopController().setSetpoint(
-          getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose)), ControlType.kVelocity);
+      double targetRPM = getRPM(SwerveSubsystem.getDistanceToHub(SwerveSubsystem.m_robotPose));
+      double currentRPM = m_shooterRightMotor.getEncoder().getVelocity();
+
+      if (currentRPM < targetRPM - ShooterConstants.kShooterRPMTolerance) {
+        // Full send until near setpoint
+        m_shooterLeftMotor.setVoltage(12.0);
+        m_shooterRightMotor.setVoltage(12.0);
+      } else {
+        // Hand off to closed loop to hold
+        m_shooterLeftMotor.getClosedLoopController().setSetpoint(targetRPM, ControlType.kVelocity);
+        m_shooterRightMotor.getClosedLoopController().setSetpoint(targetRPM, ControlType.kVelocity);
+      }
 
       // Always run upper indexer
       m_upperIndexerMotor.set(0.75);
 
       // Conditions
-      boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > UserConfig.getShooterRPM()
+      boolean flywheelReady = m_shooterRightMotor.getEncoder().getVelocity() > targetRPM
           - ShooterConstants.kShooterRPMTolerance;
 
       boolean aimEnabled = UserConfig.getHubAimEnabled();

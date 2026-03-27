@@ -35,6 +35,7 @@ public class IntakeSubsystem extends SubsystemBase {
     intakeConfig.closedLoop.pid(0.0001, 0, 0);
     intakeConfig.inverted(true);
     intakeConfig.smartCurrentLimit(80);
+    intakeConfig.closedLoopRampRate(0);
 
     m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
