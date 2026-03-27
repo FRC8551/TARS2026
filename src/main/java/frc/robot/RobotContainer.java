@@ -37,8 +37,8 @@ public class RobotContainer {
   // Swerve Input Streams
   private final SwerveInputStream m_robotRelative = SwerveInputStream.of(
       m_swerveSubsystem.getSwerveDrive(),
-      () -> -m_driverController.getLeftY(),
-      () -> -m_driverController.getLeftX())
+      () -> m_driverController.getLeftY(),
+      () -> m_driverController.getLeftX())
       .withControllerRotationAxis(() -> -m_driverController.getRightX())
       .deadband(OIConstants.kDriverControllerDeadband)
       .scaleTranslation(0.8)
@@ -49,8 +49,8 @@ public class RobotContainer {
 
   private final SwerveInputStream m_allianceRelativeDirectAngle = m_allianceRelativeAngularVelocity.copy()
       .withControllerHeadingAxis(
-          () -> m_driverController.getRightX() * (m_swerveSubsystem.isRedAlliance() ? 1 : -1),
-          () -> m_driverController.getRightY() * (m_swerveSubsystem.isRedAlliance() ? 1 : -1))
+          () -> m_driverController.getRightX() * (m_swerveSubsystem.isRedAlliance() ? -1 : 1),
+          () -> m_driverController.getRightY() * (m_swerveSubsystem.isRedAlliance() ? -1 : 1))
       .headingWhile(true);
 
   // Commands
