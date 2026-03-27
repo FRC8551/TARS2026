@@ -155,7 +155,7 @@ public class SwerveSubsystem extends SubsystemBase {
           m_swerve::getPose,
           m_swerve::resetOdometry,
           m_swerve::getRobotVelocity,
-          (speeds, feedforwards) -> drive(() -> speeds, () -> false),
+          (speeds, feedforwards) -> m_swerve.drive(speeds),
           new PPHolonomicDriveController(
               new PIDConstants(5, 0, 0),
               new PIDConstants(5, 0, 0)),
