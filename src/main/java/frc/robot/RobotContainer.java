@@ -73,7 +73,7 @@ public class RobotContainer {
   }
 
   private void registerNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", m_intakeSubsystem.runIntake());
+    NamedCommands.registerCommand("Run Intake", m_intakeSubsystem.runIntake(0.65));
     NamedCommands.registerCommand("Stop Intake", m_intakeSubsystem.stopIntake());
     NamedCommands.registerCommand("Run Shooter", m_shooterSubsystem.runShooter());
     NamedCommands.registerCommand("Stop Shooter", m_shooterSubsystem.stopShooter());
@@ -83,14 +83,14 @@ public class RobotContainer {
     m_driverController.y().onTrue(new InstantCommand(() -> m_swerveSubsystem.zeroGyro()));
 
     m_driverController.leftTrigger(0.5)
-        .whileTrue(m_intakeSubsystem.runIntake())
+        .whileTrue(m_intakeSubsystem.runIntake(0.5))
         .onFalse(m_intakeSubsystem.stopIntake());
 
     m_operatorController.button(7)
-        .whileTrue(m_intakeSubsystem.runIntake())
+        .whileTrue(m_intakeSubsystem.runIntake(0.5))
         .onFalse(m_intakeSubsystem.stopIntake());
 
-    m_operatorController.button(8).onTrue(m_intakeSubsystem.beansIntake()).onFalse(m_intakeSubsystem.toastIntake());
+    m_operatorController.button(8).onTrue(m_intakeSubsystem.runIntake(1)).onFalse(m_intakeSubsystem.runIntake(0.5));
 
     m_driverController.rightTrigger(0.5)
         .whileTrue(m_shooterSubsystem.runShooter())
@@ -104,7 +104,8 @@ public class RobotContainer {
     m_operatorController.povDown().onTrue(m_intakeSubsystem.setIntakePivotSpeed(-0.2))
         .onFalse(m_intakeSubsystem.setIntakePivotSpeed(0));
 
-    m_operatorController.button(3).whileTrue(m_intakeSubsystem.reverseIntake()).onFalse(m_intakeSubsystem.stopIntake());
+    m_operatorController.button(3).whileTrue(m_intakeSubsystem.runIntake(-0.65))
+        .onFalse(m_intakeSubsystem.stopIntake());
 
     m_operatorController.button(1).whileTrue(m_shooterSubsystem.reverseIndexers())
         .onFalse(m_shooterSubsystem.stopShooter());

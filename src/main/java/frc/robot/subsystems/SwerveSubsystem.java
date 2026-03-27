@@ -76,7 +76,7 @@ public class SwerveSubsystem extends SubsystemBase {
     setupPathPlanner();
 
     m_aimController.enableContinuousInput(-180, 180);
-    m_aimController.setTolerance(15);
+    // m_aimController.setTolerance(15);
   }
 
   @Override
@@ -89,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Math.round(getDistanceToHub(m_swerve.getPose()) * 1000.0) / 1000.0);
 
     // Store hub aim status periodically for use in commands
-    m_isAimedAtHub = m_aimController.atSetpoint();
+    m_isAimedAtHub = m_aimController.getError() < 10;
 
     m_robotPose = m_swerve.getPose();
 

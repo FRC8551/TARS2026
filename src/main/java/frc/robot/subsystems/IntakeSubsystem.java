@@ -23,8 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SparkMax m_pivotMotor = new SparkMax(IntakeConstants.kPivotMotorId, MotorType.kBrushless);
 
   private boolean m_intakeActive = false;
-  private boolean m_beansMode = false;
-  private boolean m_intakeRevsered = false;
+  private double m_intakeSpeed = 0.5;
   private boolean m_pivotCalibrated = false;
 
   /** Creates a new IntakeSubsystem. */
@@ -66,42 +65,15 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     if (m_intakeActive) {
-      if (!m_intakeRevsered) {
-        if (m_beansMode) {
-          m_intakeMotor.set(1);
-        } else {
-          m_intakeMotor.set(0.5);
-        }
-      } else {
-        m_intakeMotor.set(-0.5);
-      }
+      m_intakeMotor.set(m_intakeSpeed);
     } else {
       m_intakeMotor.set(0);
     }
   }
 
-  public Command runIntake() {
-    return run(() -> {
-      m_intakeRevsered = false;
-      m_intakeActive = true;
-    });
-  }
-
-  public Command beansIntake() {
+  public Command runIntake(double speed) {
     return runOnce(() -> {
-      m_beansMode = true;
-    });
-  }
-
-  public Command toastIntake() {
-    return runOnce(() -> {
-      m_beansMode = false;
-    });
-  }
-
-  public Command reverseIntake() {
-    return run(() -> {
-      m_intakeRevsered = true;
+      m_intakeSpeed = speed;
       m_intakeActive = true;
     });
   }
