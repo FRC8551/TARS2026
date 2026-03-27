@@ -285,6 +285,17 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  public Command zeroGyroWithAllianceCommand() {
+    return runOnce(() -> {
+      DriverStation.getAlliance().ifPresent(alliance -> {
+        m_swerve.zeroGyro();
+        if (alliance == DriverStation.Alliance.Red) {
+          m_swerve.resetOdometry(new Pose2d(m_swerve.getPose().getTranslation(), Rotation2d.k180deg));
+        }
+      });
+    });
+  }
+
   public SwerveDrive getSwerveDrive() {
     return m_swerve;
   }
